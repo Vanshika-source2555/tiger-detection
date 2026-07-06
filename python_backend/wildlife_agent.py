@@ -4,8 +4,11 @@ from datetime import datetime
 from ai_assistant import (
     ai_decision_support,
     ollama_answer,
-    generate_camera_ai_summary
+    generate_camera_ai_summary,
+    generate_sighting_story,
+    classify_sighting
 )
+from sighting_manager import add_sighting
 
 
 class WildlifeAgent:
@@ -51,6 +54,10 @@ class WildlifeAgent:
         self.plan = []
         self.execution_log = []
         self.memory_file = "agent_memory.json"
+
+        self.sighting_story = ""
+        self.sighting_classification = {}
+        self.sighting_entry = {}
 
     # ============= STEP 1: LOAD AGENT MEMORY =============
     def load_memory(self):
@@ -320,7 +327,55 @@ Keep response concise and practical.
             "ESCALATION: No escalation needed"
         )
 
-    # ============= ORCHESTRATE: 9-STEP PIPELINE =============
+    # ============= STEP 10: GENERATE SIGHTING LOG ENTRY =============
+    def generate_sighting_entry(self):
+        """
+        Builds a structured sighting log entry: AI narrative story +
+        AI classification (activity/risk/time-of-day), then persists it
+        to sightings_log.json via sighting_manager. Only confirmed tiger
+        detections are logged as sightings.
+        """
+        tiger_id = self.identify_tiger_profile()
+
+        self.sighting_story = generate_sighting_story(
+            camera_id=self.camera_id,
+            source_type=self.source_type,
+            result=self.result,
+            confidence=self.confidence,
+            message=self.message,
+            tiger_id_status=tiger_id["identification"]
+        )
+
+        self.sighting_classification = classify_sighting(
+            camera_id=self.camera_id,
+            result=self.result,
+            confidence=self.confidence,
+            frames_checked=self.frames_checked,
+            tiger_frames=self.tiger_frames
+        )
+
+        entry = {
+            "camera_id": self.camera_id,
+            "source_type": self.source_type,
+            "username": self.username,
+            "result": self.result,
+            "confidence": self.confidence,
+            "identification": tiger_id["identification"],
+            "image_path": self.image_path,
+            "file_name": self.file_name,
+            "story": self.sighting_story,
+            "activity": self.sighting_classification.get("activity", "Unknown"),
+            "risk": self.sighting_classification.get("risk", "Medium"),
+            "time_context": self.sighting_classification.get("time_context", "Unknown")
+        }
+
+        if self.result == "Tiger Detected":
+            entry = add_sighting(entry)
+
+        self.sighting_entry = entry
+        return entry
+
+    # ============= ORCHESTRATE: 10-STEP PIPELINE =============
     def execute_pipeline(self):
         results = {
             "step_1_memory_loaded": self.load_memory(),
@@ -331,7 +386,8 @@ Keep response concise and practical.
             "step_6_ai_summary": self.generate_ai_summary(),
             "step_7_suggestions": self.generate_suggestions(),
             "step_8_decision_support": self.generate_decision_support(),
-            "step_9_memory_saved": "Agent memory updated"
+            "step_9_memory_saved": "Agent memory updated",
+            "step_10_sighting_log": self.generate_sighting_entry()
         }
 
         memory = self.load_memory()
@@ -406,5 +462,9 @@ def run_wildlife_agent(**kwargs):
         "full_report": agent.show_full_report(),
         "ai_summary": agent.ai_summary,
         "ai_suggestions": agent.ai_suggestions,
-        "ai_decision": agent.ai_decision
+        "ai_decision": agent.ai_decision,
+        # Sighting Intelligence: AI story + AI classification + saved log entry
+        "sighting_story": agent.sighting_story,
+        "sighting_classification": agent.sighting_classification,
+        "sighting_entry": agent.sighting_entry
     }

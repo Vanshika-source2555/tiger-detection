@@ -447,19 +447,31 @@ You are a professional AI assistant dedicated to the Tiger Detection Monitoring 
         # ✅ FIX: Use explicit httpx client so the socket is properly
         #         closed after each call — stops the ResourceWarning:
         #         "unclosed <socket.socket ... raddr=('127.0.0.1', 11434)>"
-        with httpx.Client() as http_client:
-            client = ollama.Client(host="http://localhost:11434", httpx_client=http_client)
+        #
+        # ⚠️ COMPATIBILITY NOTE: different versions of the `ollama` PyPI
+        # package have changed whether ollama.Client() accepts a custom
+        # `httpx_client=` kwarg. Some versions raise:
+        #   TypeError: Client.__init__() got an unexpected keyword argument 'httpx_client'
+        # so we try the explicit-client version first, and transparently
+        # fall back to the plain client if that kwarg isn't supported.
+        try:
+            with httpx.Client() as http_client:
+                client = ollama.Client(host="http://localhost:11434", httpx_client=http_client)
+                response = client.chat(
+                    model="llama3.2",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": question}
+                    ]
+                )
+        except TypeError as version_mismatch:
+            print("OLLAMA CLIENT COMPAT FALLBACK (httpx_client kwarg unsupported):", version_mismatch)
+            client = ollama.Client(host="http://localhost:11434")
             response = client.chat(
                 model="llama3.2",
                 messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": question
-                    }
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": question}
                 ]
             )
 
@@ -820,3 +832,146 @@ Confidence: Low
 Recommended Action:
 Check saved frames.
 """
+
+# =========================================================
+# SIGHTING INTELLIGENCE: AI STORY + AI CLASSIFICATION
+# =========================================================
+
+def generate_sighting_story(camera_id, source_type, result, confidence, message="", tiger_id_status="New Tiger Recorded"):
+    """
+    Generates a short, natural, field-note style narrative describing a
+    tiger sighting, as if written by a forest ranger reviewing camera data.
+    """
+    prompt = f"""
+You are a wildlife field officer writing a short sighting log entry.
+
+DETECTION DETAILS:
+- Camera/Location: {camera_id}
+- Source: {source_type}
+- Result: {result}
+- Confidence: {confidence}%
+- Tiger Identity Status: {tiger_id_status}
+- Additional Info: {message}
+
+Write a short, natural field-note style story (3-5 sentences) describing this
+sighting as if logged by a forest ranger. Mention:
+- what was observed and how confident the detection is
+- whether this appears to be a new tiger or a returning individual, and why that matters
+- one practical implication for monitoring this location
+
+Write in plain narrative prose. Do not use markdown, headings, or bullet points.
+"""
+
+    try:
+        story = ollama_answer(prompt)
+        if story:
+            return story.strip()
+    except Exception as e:
+        print("Sighting story error:", e)
+
+    return _fallback_sighting_story(camera_id, result, tiger_id_status)
+
+
+def _fallback_sighting_story(camera_id, result, tiger_id_status):
+    r = (result or "").lower()
+
+    if "tiger" in r and "no tiger" not in r:
+        if "Same Tiger" in tiger_id_status:
+            return (
+                f"A tiger was sighted again at {camera_id}, with stripe patterns matching a "
+                f"previously recorded individual. This repeat appearance suggests the animal is "
+                f"maintaining territory in this zone. Field staff should log this as continued "
+                f"activity for behavioral tracking rather than a new arrival."
+            )
+        return (
+            f"A tiger was recorded at {camera_id} whose stripe pattern did not match any tiger "
+            f"currently in the database, indicating a previously unlogged individual may be entering "
+            f"the area. This location should be prioritized for follow-up monitoring over the next "
+            f"few days to confirm the animal's presence."
+        )
+
+    return (
+        f"Routine review at {camera_id} completed with no tiger activity detected during this check. "
+        f"No action is required beyond continuing the standard monitoring schedule."
+    )
+
+
+def classify_sighting(camera_id, result, confidence, frames_checked=0, tiger_frames=0):
+    """
+    Uses the LLM to classify a sighting into structured categories that can be
+    stored alongside the sighting log entry (activity type, risk level, and
+    likely time-of-day context based on detection pattern).
+    Always returns a dict, even if the AI call fails.
+    """
+    prompt = f"""
+You are classifying a wildlife camera sighting for a structured log.
+
+Camera: {camera_id}
+Result: {result}
+Confidence: {confidence}%
+Frames Checked: {frames_checked}
+Tiger Frames: {tiger_frames}
+
+Respond ONLY in this exact format, one value per line, no extra commentary:
+ACTIVITY: (Resting/Walking/Hunting/Territorial Marking/Unknown)
+RISK: (Low/Medium/High/Critical)
+TIME_CONTEXT: (Day/Night/Dusk/Dawn/Unknown)
+"""
+
+    classification = {
+        "activity": "Unknown",
+        "risk": "Medium" if "tiger" in (result or "").lower() and "no tiger" not in (result or "").lower() else "Low",
+        "time_context": "Unknown"
+    }
+
+    try:
+        response = ollama_answer(prompt)
+        if response:
+            for line in response.splitlines():
+                line = line.strip()
+                upper = line.upper()
+
+                if upper.startswith("ACTIVITY:"):
+                    classification["activity"] = line.split(":", 1)[1].strip()
+                elif upper.startswith("RISK:"):
+                    classification["risk"] = line.split(":", 1)[1].strip()
+                elif upper.startswith("TIME_CONTEXT:"):
+                    classification["time_context"] = line.split(":", 1)[1].strip()
+    except Exception as e:
+        print("Sighting classification error:", e)
+
+    return classification
+
+
+# =========================================================
+# AI CONNECTIVITY CHECK (verify Ollama is really answering,
+# not silently using fallback text)
+# =========================================================
+
+def check_ai_status():
+    """
+    Runs the SAME ollama_answer() function every real AI feature in this
+    app uses (chat, decision support, camera summary, photo/video analysis,
+    sighting stories) — not a separate simplified call. This guarantees
+    the health check reflects what users actually experience, instead of
+    potentially reporting CONNECTED via a different code path while the
+    real feature functions still silently fail and fall back.
+    """
+    test_reply = ollama_answer("Reply with exactly one word: OK")
+
+    if test_reply:
+        return {
+            "connected": True,
+            "model": "llama3.2",
+            "sample_reply": test_reply.strip()[:200]
+        }
+
+    return {
+        "connected": False,
+        "model": "llama3.2",
+        "error": (
+            "ollama_answer() returned no response. Check the server console "
+            "for a line starting with 'OLLAMA ERROR:' printed at the moment "
+            "this check ran — that line has the real underlying exception."
+        )
+    }

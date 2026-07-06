@@ -14,6 +14,9 @@ from server.config import (
 from server.detector_service import detect_tiger
 from server.alert_service import create_alert
 from database import save_detection
+from ai_assistant import generate_sighting_story, classify_sighting
+from sighting_manager import add_sighting
+from stripe_match import identify_tiger
 
 camera_threads = {}
 camera_status = {}
@@ -104,6 +107,81 @@ def final_tiger_detection(frame, camera_id):
     return "No Tiger Detected"
 
 
+def process_tiger_sighting(camera_id, frame, checked_frames, tiger_frame_count):
+    """
+    Called once per alert cooldown window when a tiger is confirmed live.
+
+    - Saves the frame
+    - Identifies whether this is a NEW tiger or the SAME tiger seen before
+      (stripe matching via stripe_match.identify_tiger)
+    - Generates an AI field-note "sighting story" + AI classification
+      (activity / risk / time-of-day)
+    - Updates camera_status so the result area reflects it immediately
+    - Writes a structured entry to sightings_log.json
+    - Fires the existing alert + detection-history save
+
+    Returns the saved image path.
+    """
+    saved_path = save_frame(frame, SAVED_TIGER_FOLDER, camera_id)
+
+    identification = identify_tiger(saved_path)  # "New Tiger Recorded" / "Same Tiger Seen Again"
+
+    story = generate_sighting_story(
+        camera_id=camera_id,
+        source_type="Live Camera",
+        result="Tiger Detected",
+        confidence=0,
+        message=identification,
+        tiger_id_status=identification
+    )
+
+    classification = classify_sighting(
+        camera_id=camera_id,
+        result="Tiger Detected",
+        confidence=0,
+        frames_checked=checked_frames,
+        tiger_frames=tiger_frame_count
+    )
+
+    camera_status[camera_id]["identification"] = identification
+    camera_status[camera_id]["sighting_story"] = story
+    camera_status[camera_id]["activity"] = classification.get("activity", "Unknown")
+    camera_status[camera_id]["risk"] = classification.get("risk", "Medium")
+    camera_status[camera_id]["time_context"] = classification.get("time_context", "Unknown")
+
+    add_sighting({
+        "camera_id": camera_id,
+        "source_type": "Live Camera",
+        "username": "admin",
+        "result": "Tiger Detected",
+        "confidence": 0,
+        "identification": identification,
+        "image_path": saved_path,
+        "file_name": camera_id,
+        "story": story,
+        "activity": classification.get("activity", "Unknown"),
+        "risk": classification.get("risk", "Medium"),
+        "time_context": classification.get("time_context", "Unknown")
+    })
+
+    create_alert(
+        camera_id=camera_id,
+        confidence=0,
+        image_path=saved_path
+    )
+
+    save_detection(
+        username="admin",
+        source_type="Live Camera",
+        file_name=camera_id,
+        result="Tiger Detected",
+        confidence=0,
+        image_path=saved_path
+    )
+
+    return saved_path
+
+
 def camera_worker(camera_id, camera_url):
     camera_status[camera_id] = {
         "status": "Starting",
@@ -113,7 +191,12 @@ def camera_worker(camera_id, camera_url):
         "last_alert_time": "No alert yet",
         "ai_summary": "Monitoring not started yet.",
         "ai_suggestion": "Start camera to begin live tiger detection.",
-        "ai_decision": "User should monitor the result."
+        "ai_decision": "User should monitor the result.",
+        "identification": "No Tiger Yet",
+        "sighting_story": "No tiger detected yet. Live monitoring active.",
+        "activity": "Idle",
+        "risk": "Low",
+        "time_context": "Live"
     }
 
     cap = open_camera(camera_url)
@@ -135,6 +218,7 @@ def camera_worker(camera_id, camera_url):
     last_processed_time = 0
     last_alert_time = 0
     checked_frames = 0
+    tiger_frame_count = 0
 
     while camera_status[camera_id]["status"] == "Online":
         success, frame = cap.read()
@@ -175,6 +259,7 @@ def camera_worker(camera_id, camera_url):
                 result = "Error"
 
             if result == "Tiger":
+                tiger_frame_count += 1
                 camera_status[camera_id]["last_result"] = "Tiger Detected"
                 camera_status[camera_id]["ai_summary"] = "Tiger detected successfully."
                 camera_status[camera_id]["ai_suggestion"] = "Review saved image and check nearby cameras."
@@ -182,37 +267,28 @@ def camera_worker(camera_id, camera_url):
 
                 if current_time - last_alert_time >= ALERT_COOLDOWN_SECONDS:
                     last_alert_time = current_time
-
                     camera_status[camera_id]["last_alert_time"] = str(datetime.now())
 
-                    saved_path = save_frame(frame, SAVED_TIGER_FOLDER, camera_id)
-
-                    create_alert(
-                        camera_id=camera_id,
-                        confidence=0,
-                        image_path=saved_path
-                    )
-
-                    save_detection(
-                        username="admin",
-                        source_type="Live Camera",
-                        file_name=camera_id,
-                        result="Tiger Detected",
-                        confidence=0,
-                        image_path=saved_path
-                    )
-
-                    print(camera_id, "Tiger Detected - Sighting Saved")
+                    try:
+                        process_tiger_sighting(camera_id, frame, checked_frames, tiger_frame_count)
+                        print(camera_id, "Tiger Detected - Sighting Saved (with AI story + identification)")
+                    except Exception as e:
+                        print("Sighting processing error:", camera_id, e)
 
             elif result == "No Tiger Detected":
-                
-
-    # Do not overwrite Tiger Detected once it happened
+                # Do not overwrite Tiger Detected once it happened this session
                 if camera_status[camera_id].get("last_result") != "Tiger Detected":
-                   camera_status[camera_id]["last_result"] = "No Tiger Detected"
-                   camera_status[camera_id]["ai_summary"] = "No tiger detected in the current frame."
-                   camera_status[camera_id]["ai_suggestion"] = "Continue monitoring."
-                   camera_status[camera_id]["ai_decision"] = "No immediate action required."
+                    camera_status[camera_id]["last_result"] = "No Tiger Detected"
+                    camera_status[camera_id]["ai_summary"] = "No tiger detected in the current frame."
+                    camera_status[camera_id]["ai_suggestion"] = "Continue monitoring."
+                    camera_status[camera_id]["ai_decision"] = "No immediate action required."
+                    camera_status[camera_id]["identification"] = "No Tiger Currently"
+                    camera_status[camera_id]["sighting_story"] = (
+                        "No tiger detected in the current frame. Monitoring remains active."
+                    )
+                    camera_status[camera_id]["activity"] = "Idle"
+                    camera_status[camera_id]["risk"] = "Low"
+                    camera_status[camera_id]["time_context"] = "Live"
 
             else:
                 camera_status[camera_id]["last_result"] = result

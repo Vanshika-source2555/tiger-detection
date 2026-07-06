@@ -398,6 +398,32 @@ public class DashboardPage extends JFrame {
         }
     }
 
+    // Pulls a nested JSON object's raw text, e.g. "sighting_classification": {...}
+    // so extractTextValue() can then be run on just that inner block.
+    String getObjectBlock(String text, String key) {
+        try {
+            int start = text.indexOf("\"" + key + "\"");
+
+            if (start == -1)
+                return "";
+
+            int braceStart = text.indexOf("{", start);
+
+            if (braceStart == -1)
+                return "";
+
+            int braceEnd = text.indexOf("}", braceStart);
+
+            if (braceEnd == -1)
+                return "";
+
+            return text.substring(braceStart, braceEnd + 1);
+
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     void updateServerHealth() {
         String response = callGetApi("http://127.0.0.1:5000/server_health");
         serverHealthLabel.setText("<html><center>Server Health<br>" + formatJsonForHtml(response) + "</center></html>");
@@ -556,6 +582,13 @@ public class DashboardPage extends JFrame {
         String aiDecisionText = extractTextValue(response, "ai_decision");
         String time = extractTextValue(response, "time");
 
+        String identification = extractTextValue(response, "identification");
+        String sightingStory = extractTextValue(response, "sighting_story");
+        String classificationBlock = getObjectBlock(response, "sighting_classification");
+        String activity = extractTextValue(classificationBlock, "activity");
+        String risk = extractTextValue(classificationBlock, "risk");
+        String timeContext = extractTextValue(classificationBlock, "time_context");
+
         String text = "========== DETECTION RESULT ==========\n\n";
 
         if (!message.equals(""))
@@ -581,6 +614,23 @@ public class DashboardPage extends JFrame {
 
         if (!time.equals(""))
             text += "Time           : " + time + "\n";
+
+        // ===== SIGHTING (shown right here in the result area — no separate button)
+        // =====
+        if (result.equalsIgnoreCase("Tiger Detected")) {
+            text += "\n========== SIGHTING ==========\n";
+            text += "Identification : " + (identification.equals("") ? "Not available" : identification) + "\n";
+            text += "Activity       : " + (activity.equals("") ? "Unknown" : activity) + "\n";
+            text += "Risk Level     : " + (risk.equals("") ? "Unknown" : risk) + "\n";
+            text += "Time Context   : " + (timeContext.equals("") ? "Unknown" : timeContext) + "\n\n";
+            text += "Sighting Story\n";
+            text += (sightingStory.equals("") ? "Not available." : sightingStory) + "\n";
+        } else {
+            text += "\n========== SIGHTING ==========\n";
+            text += (sightingStory.equals("")
+                    ? "No tiger detected. No sighting recorded."
+                    : sightingStory) + "\n";
+        }
 
         if (!aiDecisionText.equals(""))
             text += "\n========== AI DECISION ==========\n" + aiDecisionText + "\n";
@@ -853,7 +903,13 @@ public class DashboardPage extends JFrame {
             String status = extractTextValue(block, "status");
             String result = extractTextValue(block, "last_result");
             String frames = extractValue(block, "frames_checked");
-            String sameTiger = extractTextValue(block, "same_tiger_result");
+
+            // ===== Sighting fields now sent directly by camera_status =====
+            String identification = extractTextValue(block, "identification");
+            String sightingStory = extractTextValue(block, "sighting_story");
+            String activity = extractTextValue(block, "activity");
+            String risk = extractTextValue(block, "risk");
+            String timeContext = extractTextValue(block, "time_context");
 
             if (status.equals("") && result.equals("")) {
                 continue;
@@ -873,9 +929,25 @@ public class DashboardPage extends JFrame {
             text.append("Last Result : ").append(result).append("\n");
             text.append("Frames      : ").append(frames).append("\n\n");
 
-            text.append("Same Tiger Identification\n");
-            text.append(sameTiger.equals("") ? "Not available." : sameTiger);
-            text.append("\n\n");
+            // ===== SIGHTING (right here in the result area, no separate button) =====
+            text.append("Sighting\n");
+
+            if (result.equalsIgnoreCase("Tiger Detected")) {
+                text.append("Identification : ")
+                        .append(identification.equals("") ? "Not available" : identification)
+                        .append("\n");
+                text.append("Activity       : ").append(activity.equals("") ? "Unknown" : activity).append("\n");
+                text.append("Risk Level     : ").append(risk.equals("") ? "Unknown" : risk).append("\n");
+                text.append("Time Context   : ").append(timeContext.equals("") ? "Unknown" : timeContext)
+                        .append("\n\n");
+                text.append("Story: ")
+                        .append(sightingStory.equals("") ? "Not available." : sightingStory)
+                        .append("\n\n");
+            } else {
+                text.append(sightingStory.equals("")
+                        ? "No tiger currently detected on this camera.\n\n"
+                        : sightingStory + "\n\n");
+            }
 
             text.append("AI Suggestion\n");
 

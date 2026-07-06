@@ -20,7 +20,8 @@ from ai_assistant import (
     ai_decision_support,
     generate_camera_ai_summary,
     generate_photo_detection_analysis,
-    generate_video_detection_analysis
+    generate_video_detection_analysis,
+    check_ai_status
 )
 
 try:
@@ -64,6 +65,16 @@ from server.camera_manager import (
 from server.health_service import get_server_health
 from server.storage_service import delete_old_files
 from server.alert_service import read_alerts
+
+from sighting_manager import (
+    get_recent_sightings,
+    get_sightings_by_camera,
+    get_sighting_by_id,
+    get_sighting_stats,
+    clear_sightings,
+    format_sightings_text,
+    format_stats_text
+)
 
 
 app = Flask(__name__)
@@ -335,11 +346,18 @@ def api():
             output["agent_plan"] = agent_result.get("summary", "")
             output["agent_execution"] = agent_result.get("full_report", "")
             output["ai_report"] = agent_result.get("ai_summary", "")
+            # Sighting Intelligence: field-note style story + AI classification
+            output["sighting_story"] = agent_result.get("sighting_story", "")
+            output["sighting_classification"] = agent_result.get("sighting_classification", {})
+            output["identification"] = agent_result.get("sighting_entry", {}).get("identification", "")
         except Exception as e:
             print("Agent error (photo):", e)
             output["agent_plan"] = ""
             output["agent_execution"] = ""
             output["ai_report"] = ""
+            output["sighting_story"] = ""
+            output["sighting_classification"] = {}
+            output["identification"] = ""
 
         ai_text = ai_decision_support(
             output["result"],
@@ -449,6 +467,9 @@ def api():
         agent_summary = ""
         agent_full_report = ""
         agent_ai_summary = ""
+        agent_sighting_story = ""
+        agent_sighting_classification = {}
+        agent_identification = ""
 
         try:
             confidence_val = round((tiger_frames / checked_frames * 100), 2) if checked_frames > 0 else 0
@@ -465,8 +486,14 @@ def api():
             agent_summary = agent_result.get("summary", "")
             agent_full_report = agent_result.get("full_report", "")
             agent_ai_summary = agent_result.get("ai_summary", "")
+            agent_sighting_story = agent_result.get("sighting_story", "")
+            agent_sighting_classification = agent_result.get("sighting_classification", {})
+            agent_identification = agent_result.get("sighting_entry", {}).get("identification", "")
         except Exception as e:
             print("Agent error (video):", e)
+            agent_sighting_story = ""
+            agent_sighting_classification = {}
+            agent_identification = ""
 
         save_detection(
             username="admin",
@@ -493,6 +520,9 @@ def api():
             "agent_plan": agent_summary,
             "agent_execution": agent_full_report,
             "ai_report": agent_ai_summary,
+            "sighting_story": agent_sighting_story,
+            "sighting_classification": agent_sighting_classification,
+            "identification": agent_identification,
             "time": datetime.now().strftime("%d-%m-%Y %I:%M %p")
         })
 
@@ -539,6 +569,28 @@ def api():
 
     elif action == "alerts":
         return read_alerts()
+
+    elif action == "sightings":
+        camera_id = request.form.get("camera_id", "")
+        limit = request.form.get("limit", "20")
+
+        try:
+            limit = int(limit)
+        except ValueError:
+            limit = 20
+
+        if camera_id:
+            sightings = get_sightings_by_camera(camera_id, limit=limit)
+        else:
+            sightings = get_recent_sightings(limit=limit)
+
+        return format_sightings_text(sightings)
+
+    elif action == "sighting_stats":
+        return format_stats_text(get_sighting_stats())
+
+    elif action == "clear_sightings":
+        return clear_sightings()
 
     else:
         return jsonify({"success": False, "message": "Invalid action"})
@@ -602,6 +654,80 @@ def create_pdf_report(final_result, checked_frames, tiger_frames, nontiger_frame
 
     c.save()
     return pdf_path
+
+
+@app.route("/sightings", methods=["GET"])
+def sightings_route():
+    """
+    Returns the structured sighting log as plain text (matches /history, /stats style).
+    Optional query params:
+      - camera_id: filter by a specific camera
+      - limit: max number of entries (default 20)
+    """
+    camera_id = request.args.get("camera_id", "")
+    limit = request.args.get("limit", "20")
+
+    try:
+        limit = int(limit)
+    except ValueError:
+        limit = 20
+
+    if camera_id:
+        sightings = get_sightings_by_camera(camera_id, limit=limit)
+    else:
+        sightings = get_recent_sightings(limit=limit)
+
+    return format_sightings_text(sightings)
+
+
+@app.route("/sightings/<sighting_id>", methods=["GET"])
+def sighting_detail_route(sighting_id):
+    sighting = get_sighting_by_id(sighting_id)
+
+    if sighting is None:
+        return "Sighting not found"
+
+    return format_sightings_text([sighting])
+
+
+@app.route("/sighting_stats", methods=["GET"])
+def sighting_stats_route():
+    return format_stats_text(get_sighting_stats())
+
+
+@app.route("/clear_sightings", methods=["POST"])
+def clear_sightings_route():
+    return clear_sightings()
+
+
+@app.route("/ai_status", methods=["GET"])
+def ai_status_route():
+    """
+    Quick way to check whether the AI (Ollama/Llama) layer is actually
+    live, without running the Java frontend or triggering a detection.
+    Hit this directly: GET http://127.0.0.1:5000/ai_status
+    """
+    status = check_ai_status()
+
+    if status["connected"]:
+        return (
+            "AI STATUS: CONNECTED\n"
+            f"Model: {status['model']}\n"
+            f"Sample Reply: {status['sample_reply']}\n"
+            "\nReal Llama responses are being used across the app."
+        )
+
+    return (
+        "AI STATUS: NOT CONNECTED\n"
+        f"Model: {status['model']}\n"
+        f"Reason: {status['error']}\n"
+        "\nThe app is currently using rule-based FALLBACK text for all "
+        "AI Summary / Suggestion / Decision / Sighting Story fields. "
+        "Fallback text is the fixed wording hard-coded in ai_assistant.py "
+        "(e.g. 'Continue routine monitoring', 'DECISION: Continue routine "
+        "monitoring...') — if you see that exact phrasing repeat identically "
+        "across different detections, that confirms fallback mode."
+    )
 
 
 @app.route("/ai_chat", methods=["POST"])

@@ -64,7 +64,7 @@ public class AIAssistantPage extends JDialog {
         sendButton.addActionListener(e -> askAI());
         questionField.addActionListener(e -> askAI());
 
-        addBotMessage("Hello! Ask me anything about Tiger Detection.");
+        addBotMessage("Hello! Ask me anything about Tiger .");
 
         setVisible(true);
     }
