@@ -39,16 +39,31 @@ def open_camera(camera_url):
     camera_url = str(camera_url).strip()
 
     if camera_url.isdigit():
-        return cv2.VideoCapture(int(camera_url), cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(int(camera_url), cv2.CAP_DSHOW)
 
-    if os.path.exists(camera_url):
-        return cv2.VideoCapture(camera_url)
+    elif os.path.exists(camera_url):
+        cap = cv2.VideoCapture(camera_url)
 
-    return cv2.VideoCapture(camera_url)
+    else:
+        cap = cv2.VideoCapture(camera_url)
+
+    # Reduce camera buffering
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+    # Optional: Lower resolution for smoother processing
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+    return cap
 
 
 def detect_tiger_full_frame(frame, camera_id):
-    frame_path = save_frame(frame, TEMP_FRAMES_FOLDER, camera_id + "_full")
+    frame_path = os.path.join(
+    TEMP_FRAMES_FOLDER,
+    camera_id + "_full.jpg"
+)
+
+    cv2.imwrite(frame_path, frame)
     prediction = detect_tiger(frame_path)
 
     print("Full Frame Prediction:", prediction)
@@ -77,11 +92,12 @@ def detect_tiger_multi_crop(frame, camera_id):
         if crop is None or crop.size == 0:
             continue
 
-        crop_path = save_frame(
-            crop,
-            TEMP_FRAMES_FOLDER,
-            camera_id + "_crop_" + str(i)
-        )
+        crop_path = os.path.join(
+    TEMP_FRAMES_FOLDER,
+    f"{camera_id}_crop_{i}.jpg"
+)
+
+        cv2.imwrite(crop_path, crop)
 
         prediction = detect_tiger(crop_path)
 

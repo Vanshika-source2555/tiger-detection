@@ -21,7 +21,7 @@ public class DashboardPage extends JFrame {
     long lastPopupTime = 0;
     String lastAlertKey = "";
 
-    // ✅ FIX: This flag stops the auto-refresh timer from overwriting
+    // This flag stops the auto-refresh timer from overwriting
     // your video/photo detection result in the result area.
     // Set to true while detection is running, false when done.
     boolean detectionRunning = false;
@@ -30,36 +30,40 @@ public class DashboardPage extends JFrame {
         this.email = email;
 
         setTitle("Tiger Detection Dashboard");
-        setSize(1180, 780);
+        setSize(1180, 860);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
-        getContentPane().setBackground(new Color(245, 247, 250));
+        UIStyle.applyPageChrome(this);
 
-        JButton menuButton = new JButton("MENU");
-        menuButton.setBounds(20, 15, 90, 38);
-        styleTopButton(menuButton);
+        JButton menuButton = new UIStyle.RoundedButton("\u2630", Color.WHITE, UIStyle.TEXT_DARK, Color.WHITE);
+        menuButton.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        menuButton.setBounds(20, 13, 42, 38);
         add(menuButton);
 
-        JLabel title = new JLabel("Tiger Detection Monitoring System");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 25));
-        title.setForeground(new Color(0, 70, 130));
-        title.setBounds(320, 15, 560, 40);
-        add(title);
+        JPanel titleWrap = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        titleWrap.setOpaque(false);
+        titleWrap.setBounds(130, 10, 560, 48);
+        titleWrap.add(new UIStyle.PawIcon(32));
+        JLabel title = new JLabel("Tiger detection monitoring system");
+        title.setFont(UIStyle.FONT_HEADING.deriveFont(19f));
+        title.setForeground(UIStyle.TEXT_DARK);
+        titleWrap.add(title);
+        add(titleWrap);
 
         JLabel welcome = new JLabel("Welcome, " + email);
-        welcome.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        welcome.setBounds(850, 20, 170, 30);
+        welcome.setFont(UIStyle.FONT_BODY);
+        welcome.setForeground(UIStyle.TEXT_MUTED);
+        welcome.setBounds(760, 24, 215, 25);
+        welcome.setHorizontalAlignment(SwingConstants.RIGHT);
         add(welcome);
 
-        JButton accountBtn = new JButton("Account");
-        accountBtn.setBounds(1015, 18, 75, 35);
-        styleTopButton(accountBtn);
+        JButton accountBtn = new UIStyle.RoundedButton("Account", Color.WHITE, UIStyle.TEXT_MUTED, Color.WHITE);
+        accountBtn.setBounds(985, 18, 90, 35);
         add(accountBtn);
 
-        JButton logoutBtn = new JButton("Logout");
-        logoutBtn.setBounds(1095, 18, 75, 35);
-        styleTopButton(logoutBtn);
+        JButton logoutBtn = new UIStyle.RoundedButton("Logout", UIStyle.BUTTON_BLACK, Color.WHITE, UIStyle.BUTTON_BLACK);
+        logoutBtn.setBounds(1082, 18, 90, 35);
         add(logoutBtn);
 
         accountBtn.addActionListener(e -> new AccountPage(email));
@@ -68,6 +72,11 @@ public class DashboardPage extends JFrame {
             dispose();
             new LoginPage();
         });
+
+        JPanel headerLine = new JPanel();
+        headerLine.setBackground(UIStyle.BORDER_SOFT);
+        headerLine.setBounds(0, 64, 1180, 1);
+        add(headerLine);
 
         createSidePanel();
         add(sidePanel);
@@ -78,15 +87,17 @@ public class DashboardPage extends JFrame {
         addCameraPanel("CAM_4", 610, 300);
 
         resultArea = new JTextArea("Result: Waiting...");
-        resultArea.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        resultArea.setFont(UIStyle.FONT_BODY.deriveFont(Font.BOLD));
         resultArea.setEditable(false);
         resultArea.setLineWrap(true);
         resultArea.setWrapStyleWord(true);
-        resultArea.setBackground(Color.WHITE);
+        resultArea.setBackground(UIStyle.TILE_BG);
+        resultArea.setForeground(UIStyle.TEXT_DARK);
         resultArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JScrollPane scroll = new JScrollPane(resultArea);
-        scroll.setBounds(270, 510, 650, 150);
+        scroll.setBounds(270, 510, 650, 290);
+        scroll.setBorder(BorderFactory.createLineBorder(UIStyle.BORDER_SOFT));
         add(scroll);
 
         cam1StatusCard = createCard("CAM_1<br>Stopped<br>Result: None<br>Frames: 0");
@@ -110,8 +121,9 @@ public class DashboardPage extends JFrame {
         add(serverHealthLabel);
 
         JLabel status = new JLabel("Status: Ready");
-        status.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        status.setBounds(270, 700, 400, 25);
+        status.setFont(UIStyle.FONT_LABEL);
+        status.setForeground(UIStyle.TEXT_MUTED);
+        status.setBounds(270, 810, 400, 25);
         add(status);
 
         menuButton.addActionListener(e -> {
@@ -122,13 +134,8 @@ public class DashboardPage extends JFrame {
         startAutoRefresh();
 
         // ===== AI Button =====
-        JButton aiButton = new JButton("AI");
-        aiButton.setBounds(1080, 650, 65, 65);
-        aiButton.setBackground(new Color(0, 120, 215));
-        aiButton.setForeground(Color.WHITE);
-        aiButton.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        aiButton.setFocusPainted(false);
-        aiButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        UIStyle.RoundedButton aiButton = new UIStyle.RoundedButton("Ask AI", UIStyle.BUTTON_BLACK, Color.WHITE, UIStyle.BUTTON_BLACK);
+        aiButton.setBounds(1050, 650, 100, 55);
         add(aiButton);
 
         aiButton.addActionListener(e -> new AIAssistantPage(this));
@@ -139,13 +146,13 @@ public class DashboardPage extends JFrame {
     void createSidePanel() {
         sidePanel = new JPanel();
         sidePanel.setLayout(null);
-        sidePanel.setBounds(0, 65, 250, 680);
-        sidePanel.setBackground(new Color(235, 240, 245));
-        sidePanel.setBorder(BorderFactory.createLineBorder(new Color(200, 210, 220)));
+        sidePanel.setBounds(0, 65, 250, 795);
+        sidePanel.setBackground(Color.WHITE);
+        sidePanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIStyle.BORDER_SOFT));
 
         JLabel menuTitle = new JLabel("CONTROL MENU", SwingConstants.CENTER);
-        menuTitle.setForeground(new Color(0, 70, 130));
-        menuTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        menuTitle.setForeground(UIStyle.TEXT_MUTED);
+        menuTitle.setFont(UIStyle.FONT_LABEL.deriveFont(Font.BOLD, 12f));
         menuTitle.setBounds(0, 15, 250, 30);
         sidePanel.add(menuTitle);
 
@@ -212,7 +219,7 @@ public class DashboardPage extends JFrame {
             File selectedFrame = chooser.getSelectedFile();
             lastSelectedFile = selectedFrame;
 
-            // ✅ FIX: Block auto-refresh from overwriting result
+            // Block auto-refresh from overwriting result
             detectionRunning = true;
             resultArea.setText("Processing selected captured frame...\nPlease wait...");
 
@@ -230,7 +237,7 @@ public class DashboardPage extends JFrame {
                                     "\n\n========== AI DECISION SUPPORT ==========\n\n" +
                                     aiDecision);
 
-                    // ✅ FIX: Allow auto-refresh again after result is shown
+                    // Allow auto-refresh again after result is shown
                     detectionRunning = false;
 
                     if (isTigerDetected(response)) {
@@ -242,7 +249,7 @@ public class DashboardPage extends JFrame {
                                 JOptionPane.WARNING_MESSAGE);
                         showNotification(
                                 "TIGER DETECTED!",
-                                new Color(255, 245, 245),
+                                UIStyle.BG_PAGE,
                                 new Color(180, 0, 0));
                     } else {
                         JOptionPane.showMessageDialog(
@@ -252,7 +259,7 @@ public class DashboardPage extends JFrame {
                                 JOptionPane.INFORMATION_MESSAGE);
                         showNotification(
                                 "NO TIGER DETECTED",
-                                new Color(235, 255, 235),
+                                UIStyle.BG_PAGE,
                                 new Color(0, 120, 0));
                     }
                 });
@@ -263,7 +270,7 @@ public class DashboardPage extends JFrame {
     void addCameraPanel(String cameraId, int x, int y) {
         LiveVideoPanel cam = new LiveVideoPanel(cameraId);
         cam.setBounds(x, y, 310, 190);
-        cam.setBorder(BorderFactory.createLineBorder(new Color(0, 105, 180), 2));
+        cam.setBorder(BorderFactory.createLineBorder(UIStyle.BORDER_SOFT, 2));
         add(cam);
     }
 
@@ -277,9 +284,9 @@ public class DashboardPage extends JFrame {
     }
 
     JButton addMenuButton(String text, int y) {
-        JButton button = new JButton(text);
-        button.setBounds(25, y, 200, 34);
-        styleMenuButton(button);
+        UIStyle.RoundedButton button = new UIStyle.RoundedButton(text, Color.WHITE, new Color(58, 58, 58), Color.WHITE);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setBounds(15, y, 220, 34);
         sidePanel.add(button);
         return button;
     }
@@ -287,10 +294,10 @@ public class DashboardPage extends JFrame {
     JLabel createCard(String text) {
         JLabel label = new JLabel("<html><center>" + text + "</center></html>", SwingConstants.CENTER);
         label.setOpaque(true);
-        label.setBackground(Color.WHITE);
-        label.setForeground(new Color(0, 70, 130));
-        label.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        label.setBorder(BorderFactory.createLineBorder(new Color(0, 105, 180), 2));
+        label.setBackground(UIStyle.TILE_BG);
+        label.setForeground(UIStyle.TEXT_DARK);
+        label.setFont(UIStyle.FONT_BODY.deriveFont(Font.BOLD));
+        label.setBorder(BorderFactory.createLineBorder(UIStyle.BORDER_SOFT));
         return label;
     }
 
@@ -310,7 +317,7 @@ public class DashboardPage extends JFrame {
         updateOneCameraCard(cam3StatusCard, response, "CAM_3");
         updateOneCameraCard(cam4StatusCard, response, "CAM_4");
 
-        // ✅ FIX: Only update the result area with camera status when
+        // Only update the result area with camera status when
         // NO detection is currently running.
         // This prevents the auto-refresh from wiping your video/photo result.
         if (!detectionRunning) {
@@ -333,13 +340,13 @@ public class DashboardPage extends JFrame {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "🐅 Tiger Detected\n\nSighting Saved",
+                    "\uD83D\uDC05 Tiger Detected\n\nSighting Saved",
                     "Live Camera Alert",
                     JOptionPane.WARNING_MESSAGE);
 
             showNotification(
-                    "🐅 Tiger Detected",
-                    new Color(255, 245, 245),
+                    "\uD83D\uDC05 Tiger Detected",
+                    UIStyle.BG_PAGE,
                     new Color(180, 0, 0));
 
             lastPopupTime = now;
@@ -479,30 +486,6 @@ public class DashboardPage extends JFrame {
         }
     }
 
-    // ✅ FIXED chooseAndDetect — sets detectionRunning = true before the HTTP call
-    // and detectionRunning = false AFTER the result is written to resultArea.
-    //
-    // WHAT YOU WILL SEE IN THE RESULT AREA after uploading a video:
-    //
-    // ========== DETECTION RESULT ==========
-    // Result : Tiger Detected ← or No Tiger Detected
-    // Frames Checked : 45
-    // Tiger Frames : 8
-    // Non-Tiger Frames : 37
-    // Saved Image : C:\...\saved_tigers\tiger_20260628.jpg
-    // PDF Report : C:\...\pdf_reports\report_20260628.pdf
-    // Time : 28-06-2026 10:30 PM
-    //
-    // ========== AI DECISION ==========
-    // [AI text from Ollama/Gemini here]
-    //
-    // ========== RAW SERVER RESPONSE ==========
-    // [Full JSON from Flask]
-    //
-    // ========== AI DECISION SUPPORT ==========
-    // [Second AI analysis]
-    //
-    // This result stays on screen permanently until you do another action.
     void chooseAndDetect(String action) {
         JFileChooser chooser = new JFileChooser();
         int option = chooser.showOpenDialog(this);
@@ -520,7 +503,7 @@ public class DashboardPage extends JFrame {
                 new FullScreenPreview(lastSelectedFile);
             }
 
-            // ✅ FIX: Block auto-refresh from overwriting result while processing
+            // Block auto-refresh from overwriting result while processing
             detectionRunning = true;
             resultArea.setText("Processing...\nPlease wait. Detection is running...");
 
@@ -541,7 +524,7 @@ public class DashboardPage extends JFrame {
                                     "\n\n========== AI DECISION SUPPORT ==========\n\n" +
                                     aiDecision);
 
-                    // ✅ FIX: Only NOW allow auto-refresh to update the result area again
+                    // Only NOW allow auto-refresh to update the result area again
                     detectionRunning = false;
 
                     if (isTigerDetected(response)) {
@@ -553,7 +536,7 @@ public class DashboardPage extends JFrame {
                                 JOptionPane.WARNING_MESSAGE);
                         showNotification(
                                 "TIGER DETECTED!",
-                                new Color(255, 245, 245),
+                                UIStyle.BG_PAGE,
                                 new Color(180, 0, 0));
                     } else {
                         JOptionPane.showMessageDialog(
@@ -563,7 +546,7 @@ public class DashboardPage extends JFrame {
                                 JOptionPane.INFORMATION_MESSAGE);
                         showNotification(
                                 "NO TIGER DETECTED",
-                                new Color(235, 255, 235),
+                                UIStyle.BG_PAGE,
                                 new Color(0, 120, 0));
                     }
                 });
@@ -615,8 +598,6 @@ public class DashboardPage extends JFrame {
         if (!time.equals(""))
             text += "Time           : " + time + "\n";
 
-        // ===== SIGHTING (shown right here in the result area — no separate button)
-        // =====
         if (result.equalsIgnoreCase("Tiger Detected")) {
             text += "\n========== SIGHTING ==========\n";
             text += "Identification : " + (identification.equals("") ? "Not available" : identification) + "\n";
@@ -818,7 +799,7 @@ public class DashboardPage extends JFrame {
         }
     }
 
-    String encode(String text) {
+    public String encode(String text) {
         try {
             return URLEncoder.encode(text, "UTF-8");
         } catch (Exception e) {
@@ -833,7 +814,7 @@ public class DashboardPage extends JFrame {
         label.setOpaque(true);
         label.setBackground(background);
         label.setForeground(foreground);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        label.setFont(UIStyle.FONT_HEADING);
         label.setBorder(BorderFactory.createLineBorder(foreground, 2));
 
         notification.add(label);
@@ -846,25 +827,6 @@ public class DashboardPage extends JFrame {
         Timer timer = new Timer(4000, e -> notification.dispose());
         timer.setRepeats(false);
         timer.start();
-    }
-
-    void styleMenuButton(JButton button) {
-        button.setBackground(Color.WHITE);
-        button.setForeground(new Color(30, 30, 30));
-        button.setFocusPainted(false);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        button.setBorder(BorderFactory.createLineBorder(new Color(190, 200, 210)));
-    }
-
-    void styleTopButton(JButton button) {
-        button.setBackground(Color.WHITE);
-        button.setForeground(Color.BLACK);
-        button.setOpaque(true);
-        button.setContentAreaFilled(true);
-        button.setBorderPainted(true);
-        button.setFocusPainted(false);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        button.setBorder(BorderFactory.createLineBorder(new Color(0, 105, 180), 2));
     }
 
     String getCameraAIDynamicSummary(
@@ -904,7 +866,6 @@ public class DashboardPage extends JFrame {
             String result = extractTextValue(block, "last_result");
             String frames = extractValue(block, "frames_checked");
 
-            // ===== Sighting fields now sent directly by camera_status =====
             String identification = extractTextValue(block, "identification");
             String sightingStory = extractTextValue(block, "sighting_story");
             String activity = extractTextValue(block, "activity");
@@ -929,7 +890,6 @@ public class DashboardPage extends JFrame {
             text.append("Last Result : ").append(result).append("\n");
             text.append("Frames      : ").append(frames).append("\n\n");
 
-            // ===== SIGHTING (right here in the result area, no separate button) =====
             text.append("Sighting\n");
 
             if (result.equalsIgnoreCase("Tiger Detected")) {

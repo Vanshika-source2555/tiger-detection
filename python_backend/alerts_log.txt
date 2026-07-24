@@ -390,3 +390,276 @@ Confidence: 0%
 Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260706_173857_427387.jpg
 Time: 2026-07-06 17:40:40.359860
 =======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260708_165931_980350.jpg
+Time: 2026-07-08 17:00:48.721747
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260708_170049_339271.jpg
+Time: 2026-07-08 17:01:23.842976
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182044_608414.jpg
+Time: 2026-07-14 18:21:57.042682
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182157_449289.jpg
+Time: 2026-07-14 18:22:26.427395
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182226_803609.jpg
+Time: 2026-07-14 18:23:01.538978
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182302_218654.jpg
+Time: 2026-07-14 18:23:32.118184
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182332_660988.jpg
+Time: 2026-07-14 18:24:05.668209
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182406_305262.jpg
+Time: 2026-07-14 18:24:40.977402
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182441_590258.jpg
+Time: 2026-07-14 18:25:16.127203
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182516_829709.jpg
+Time: 2026-07-14 18:25:50.280062
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182551_167667.jpg
+Time: 2026-07-14 18:26:24.115838
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182624_920738.jpg
+Time: 2026-07-14 18:26:54.518588
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182655_092137.jpg
+Time: 2026-07-14 18:27:26.490271
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_182727_053017.jpg
+Time: 2026-07-14 18:27:57.069776
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_184101_476154.jpg
+Time: 2026-07-14 18:42:22.732541
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_184223_305440.jpg
+Time: 2026-07-14 18:42:57.490468
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_184258_226134.jpg
+Time: 2026-07-14 18:43:30.208584
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_184330_533426.jpg
+Time: 2026-07-14 18:44:00.631584
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_184403_037023.jpg
+Time: 2026-07-14 18:44:40.437975
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190124_844342.jpg
+Time: 2026-07-14 19:02:39.895900
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190240_502334.jpg
+Time: 2026-07-14 19:03:15.830513
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190316_368246.jpg
+Time: 2026-07-14 19:03:51.139560
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190351_729535.jpg
+Time: 2026-07-14 19:04:24.551287
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190425_537450.jpg
+Time: 2026-07-14 19:06:08.260630
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190608_944213.jpg
+Time: 2026-07-14 19:06:37.438043
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190637_671815.jpg
+Time: 2026-07-14 19:07:04.662847
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260714_190704_958423.jpg
+Time: 2026-07-14 19:07:33.430819
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_211844_897661.jpg
+Time: 2026-07-20 21:20:10.129019
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212010_852988.jpg
+Time: 2026-07-20 21:20:41.937662
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212042_438802.jpg
+Time: 2026-07-20 21:21:15.581529
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212116_203747.jpg
+Time: 2026-07-20 21:21:45.151979
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212145_598139.jpg
+Time: 2026-07-20 21:22:21.086089
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212221_587833.jpg
+Time: 2026-07-20 21:22:55.209290
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212255_737765.jpg
+Time: 2026-07-20 21:23:28.338428
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212328_837062.jpg
+Time: 2026-07-20 21:24:02.447985
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260720_212403_167235.jpg
+Time: 2026-07-20 21:24:34.925403
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260721_174143_624554.jpg
+Time: 2026-07-21 17:43:18.228651
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260721_174318_904129.jpg
+Time: 2026-07-21 17:43:56.645356
+=======================
+
+===== TIGER ALERT =====
+Camera ID: CAM_4
+Confidence: 0%
+Image Path: C:\Users\VANSHIKA\OneDrive\Desktop\tiger detection\python_backend\saved_tigers\CAM_4_20260721_174357_272604.jpg
+Time: 2026-07-21 17:44:32.713029
+=======================
